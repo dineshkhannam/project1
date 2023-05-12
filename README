@@ -1,2 +1,3 @@
 this is test project for github CI
-this github CI going to push to dockerhub
+this github CI going to push to dockerhub 
+test -1 ci is failed and ci 2 too failed.
