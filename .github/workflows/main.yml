@@ -46,5 +46,25 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+        
+  
+  update-manifest-stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: dineshkhannam/testing_repo
+          ref: 'kube-manifest'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: setup git config
+        run: |
+          git config --global user.email "dinesh.khannam@gmail.com"
+          git config --global user.name "dineshkhanna"
+          echo ${{ github.sha }}
+          sed -i "s#${{ github.actor }}.*#${{ github.actor }}/gitops01:${{ github.sha }}#g" deployment.yaml
+          git add -A
+          git commit -am "Update image for - ${{ github.sha }}"
+      - run: echo ${{ github }}
+      - run: git push origin dev
 
   
