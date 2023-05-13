@@ -68,6 +68,6 @@ jobs:
           git add -A
           git commit -am "Update image for - ${{ github.sha }}"
       - run: echo ${{ github }}
-      - run: git push origin dev
+      - run: git push origin kube-manifest
 
   
