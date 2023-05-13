@@ -5,3 +5,5 @@ facing challenges in github container registory login
 build failed due to invalid line present ####
 
 day-2: added secrets to pull image ghcr pivate image
+
+removed github workfows in dev & kube-manifest branches 
