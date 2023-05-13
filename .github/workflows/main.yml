@@ -52,6 +52,9 @@ jobs:
   
   update-manifest-stage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     needs: ['build']
     steps:
       - uses: actions/checkout@v3
