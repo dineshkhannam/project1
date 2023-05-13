@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: dineshkhannam/testing_repo
+          repository: dineshkhannam/project1
           ref: 'kube-manifest'
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: setup git config
