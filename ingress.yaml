@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: days-app-ingress
+  namespace: keda #sample
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: minikube-example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix  
+            backend:
+              service:
+                name: keda-add-ons-http-interceptor-proxy #static-web-service
+                port:
+                  number: 8080 #80
+  tls:
+    - hosts:
+      - minikube-example.com
+      secretName: nginx1-tls-secret
+
