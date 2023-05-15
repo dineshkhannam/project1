@@ -9,3 +9,5 @@ day-2: added secrets to pull image ghcr pivate image
 removed github workfows in dev & kube-manifest branches
 
 abnormal behave CI is failed in day2
+
+argocd app create is created in GUI
