@@ -20,6 +20,9 @@ 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
 
 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
 
+
+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
+
 echo $CR_PAT | docker login ghcr.io -u dineshkhannam --password-stdin
 export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
 
