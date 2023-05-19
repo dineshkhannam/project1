@@ -11,3 +11,9 @@ removed github workfows in dev & kube-manifest branches
 abnormal behave CI is failed in day2
 
 argocd app create is created in GUI
+
+
+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
+export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
+
+export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
