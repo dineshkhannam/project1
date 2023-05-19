@@ -14,7 +14,7 @@ spec:
       - name: github-container-registry-login
       containers:
       - name: days-app-container
-        image: ghcr.io/dineshkhannam/gitops01:0caab22e701a2cc402739d68a6d648aada95d7e2
+        image: ghcr.io/dineshkhannam/gitops01:abad17b8cb6e0714753df2dc2d1b3e96dd9d1c43
         imagePullPolicy: Always
         ports:
         - containerPort: 80
