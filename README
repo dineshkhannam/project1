@@ -16,6 +16,8 @@ argocd app create is created in GUI
 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
 
 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
+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
+
 echo $CR_PAT | docker login ghcr.io -u dineshkhannam --password-stdin
 export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
 
