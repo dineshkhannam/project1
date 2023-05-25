@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/dineshkhannam/gitops
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 
+  tag:8007d3bd8eb91ada5163e10dffc7cf79e69353a
 
 imagePullSecrets: github-container-registry-login
 
