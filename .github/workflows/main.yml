@@ -68,7 +68,7 @@ jobs:
           git config --global user.name "dineshkhanna"
           echo ${{ github.sha }}
           echo "updated image tag in values file"
-          sed -i "s,tag:.*,tag:\${{ github.sha }}," helm/values.yaml
+          sed -i "s,tag:.*,tag:\ ${{ github.sha }}," helm/values.yaml
           ## sed -i "s#${{ github.actor }}.*#${{ github.actor }}/gitops01:${{ github.sha }}#g" deployment.ya
           #cd deploy
           #sed -i "s#${{ github.actor }}.*#${{ github.actor }}/gitops:${{ github.sha }}#g" deployment.yaml
