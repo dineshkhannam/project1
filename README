@@ -28,4 +28,6 @@ sJTKGCUCsOVUqj7uOAI8vmtf2mtbKy1IHM
 echo $CR_PAT | docker login ghcr.io -u dineshkhannam --password-stdin
 export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
 
+Added helm charts to testing : v1
+
 export CR_PAT=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 | docker login ghcr.io -u dineshkhannam --passowrd-stdin
