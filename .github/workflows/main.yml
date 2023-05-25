@@ -61,7 +61,9 @@ jobs:
           git config --global user.email "dinesh.khannam@gmail.com"
           git config --global user.name "dineshkhanna"
           echo ${{ github.sha }}
-          sed -i "s#${{ github.actor }}.*#${{ github.actor }}/gitops01:${{ github.sha }}#g" deployment.yaml
+          echo "updated image tag in values file"
+          sed -i "s,tag:.*,tag:\${{ github.sha }}," helm/values.yaml
+          ## sed -i "s#${{ github.actor }}.*#${{ github.actor }}/gitops01:${{ github.sha }}#g" deployment.yaml
           git add -A
           git commit -am "Update image for - ${{ github.sha }}"
       - run: echo ${{ github }}
