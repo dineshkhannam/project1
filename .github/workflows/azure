@@ -1,0 +1,152 @@
+name: Azure Provisioning Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Select the Terraform action to perform'
+        required: true
+        type: choice
+        options:
+          - init
+          - validate
+          - plan
+          - apply
+          - destroy
+          - target-apply
+          - import
+          - dry-run
+      resource:
+        description: 'Select the resource to provision'
+        required: true
+        type: choice
+        options:
+          - AKS
+          - ACR
+          - KeyVaults
+          - ResourceGroup
+          - NSG
+      environment:
+        description: 'Select the environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - qa
+          - test
+      target:
+        description: 'Specify target resource (required for target-apply)'
+        required: false
+
+jobs:
+  terraform-init:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Azure Credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets[format('{0}_AZURE_CREDENTIALS', github.event.inputs.environment | upper)] }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.6
+
+      - name: Ensure Terraform Workspace Exists
+        run: |
+          if terraform workspace list | grep -qw ${{ github.event.inputs.environment }}; then
+            echo "Workspace exists. Selecting it."
+            terraform workspace select ${{ github.event.inputs.environment }}
+          else
+            echo "Workspace does not exist. Creating it."
+            terraform workspace new ${{ github.event.inputs.environment }}
+          fi
+
+      - name: Prepare Resource Variables
+        id: prepare_vars
+        run: |
+          RESOURCE=$(echo "${{ github.event.inputs.resource }}" | tr '[:upper:]' '[:lower:]')
+          STORAGE_ACCOUNT=${{ secrets.COMMON_STORAGE_ACCOUNT }}
+          CONTAINER_NAME=${{ github.event.inputs.environment }}-${RESOURCE}-states
+          MODULE_PATH=./terraform/modules
+          RESOURCE_PATH=${MODULE_PATH}/${RESOURCE}
+          WORK_DIR=./terraform/workspaces/${{ github.event.inputs.environment }}/${RESOURCE}
+          
+          if [ ! -d "$RESOURCE_PATH" ]; then
+            echo "Error: Terraform module path $RESOURCE_PATH does not exist."
+            exit 1
+          fi
+          
+          if [ -d "$WORK_DIR" ]; then
+            echo "Cleaning existing directory $WORK_DIR"
+            rm -rf "$WORK_DIR"
+          fi
+
+          mkdir -p $WORK_DIR
+          rsync -a $RESOURCE_PATH/ $WORK_DIR/
+
+          ENV_VARS_FILE=./terraform/environments/${{ github.event.inputs.environment }}.tfvars
+          if [ ! -f "$ENV_VARS_FILE" ]; then
+            echo "Error: Environment-specific variables file $ENV_VARS_FILE does not exist."
+            exit 1
+          fi
+
+          echo "RESOURCE=$RESOURCE" >> $GITHUB_ENV
+          echo "STORAGE_ACCOUNT=$STORAGE_ACCOUNT" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=$CONTAINER_NAME" >> $GITHUB_ENV
+          echo "WORK_DIR=$WORK_DIR" >> $GITHUB_ENV
+          echo "ENV_VARS_FILE=$ENV_VARS_FILE" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="key=${{ github.event.inputs.environment }}/${{ env.RESOURCE }}.tfstate" \
+            -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.CONTAINER_NAME }}" \
+            -backend-config="access_key=${{ secrets.COMMON_STORAGE_KEY }}"
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    needs: terraform-init
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Change Directory to Modules
+        run: cd ${{ env.WORK_DIR }}
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  terraform-plan:
+    runs-on: ubuntu-latest
+    needs: terraform-validate
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Change Directory to Modules
+        run: cd ${{ env.WORK_DIR }}
+
+      - name: Terraform Plan
+        run: terraform plan -var-file=${{ env.ENV_VARS_FILE }} -out=${{ env.RESOURCE }}-plan.tfplan
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Change Directory to Modules
+        run: cd ${{ env.WORK_DIR }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve ${{ env.RESOURCE }}-plan.tfplan
